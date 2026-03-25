@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sıla'nın Kliniği</title>
+<style>
+  /* ─── Reset & Base ─────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-dark:      #0d1117;
+    --bg-panel:     #161b22;
+    --bg-card:      #1c2330;
+    --border:       #30363d;
+    --accent:       #2ea68a;
+    --accent-soft:  #1a5c4e;
+    --accent-glow:  rgba(46,166,138,0.18);
+    --danger:       #e05c5c;
+    --warn:         #e8a838;
+    --ok:           #3fb950;
+    --text-main:    #e6edf3;
+    --text-muted:   #7d8590;
+    --text-sub:     #a8b3bf;
+    --font-mono:    'Courier New', monospace;
+    --font-ui:      'Segoe UI', system-ui, sans-serif;
+    --radius:       8px;
+    --radius-lg:    14px;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    overflow: hidden;
+  }
+
+  /* ─── Layout ───────────────────────────────────── */
+  #app {
+    display: grid;
+    grid-template-rows: 52px 1fr;
+    grid-template-columns: 1fr;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  #main-body {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* ─── Top Bar ──────────────────────────────────── */
+  #topbar {
+    grid-column: 1 / -1;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 24px;
+    z-index: 10;
+  }
+
+  #topbar .logo {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #topbar .logo .cross {
+    width: 20px; height: 20px;
+    background: var(--accent);
+    border-radius: 3px;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    color: #fff;
+  }
+
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 13px;
+    font-size: 13px;
+    color: var(--text-sub);
+  }
+
+  .stat-chip .label { color: var(--text-muted); font-size: 11px; }
+  .stat-chip .value { font-weight: 600; }
+  .stat-chip .value.gold  { color: var(--warn); }
+  .stat-chip .value.rep   { color: var(--accent); }
+  .stat-chip .value.time  { color: var(--text-main); font-family: var(--font-mono); font-size: 13px; }
+
+  .stat-chip .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 6px var(--ok);
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+  }
+
+  /* ─── Left Panel ───────────────────────────────── */
+  #left-panel {
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+  }
+
+  .panel-section {
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .panel-section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  /* ─── Avatar ───────────────────────────────────── */
+  #avatar-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #avatar-canvas {
+    width: 120px;
+    height: 150px;
+    background: var(--bg-card);
+    border: 2px solid var(--accent-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 20px var(--accent-glow);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Sıla pixel art placeholder */
+  #avatar-canvas canvas {
+    image-rendering: pixelated;
+    display: block;
+  }
+
+  .avatar-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .avatar-title {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── Vitals Monitor ───────────────────────────── */
+  #vitals-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .vital-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .vital-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vital-name {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .vital-name .icon { font-size: 13px; }
+
+  .vital-value {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--ok);
+  }
+
+  .vital-value.warn   { color: var(--warn); }
+  .vital-value.danger { color: var(--danger); animation: blink 0.6s infinite; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.2; }
+  }
+
+  .vital-bar-track {
+    height: 4px;
+    background: var(--bg-dark);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .vital-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--ok);
+    transition: width 0.6s ease, background 0.4s;
+  }
+
+  /* ECG line area */
+  #ecg-container {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px;
+    margin-top: 4px;
+  }
+
+  #ecg-canvas {
+    display: block;
+    width: 100%;
+    height: 40px;
+  }
+
+  /* ─── Patient Card ─────────────────────────────── */
+  #patient-info {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .patient-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .patient-row .key   { color: var(--text-muted); }
+  .patient-row .val   { color: var(--text-main); font-weight: 600; }
+
+  .species-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ─── Right Panel ──────────────────────────────── */
+  #right-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-dark);
+  }
+
+  /* Story box */
+  #story-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 20px 24px 12px;
+    gap: 14px;
+  }
+
+  #story-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #story-header .case-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  #story-header .case-id {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-left: auto;
+  }
+
+  #story-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  #story-scroll::-webkit-scrollbar { width: 4px; }
+  #story-scroll::-webkit-scrollbar-track { background: transparent; }
+  #story-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .story-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .story-entry .who {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent);
+  }
+
+  .story-entry .who.system { color: var(--text-muted); }
+
+  .story-entry .msg {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-main);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+
+  .story-entry .msg.system {
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  .story-entry .msg.alert {
+    border-color: var(--danger);
+    background: rgba(224,92,92,0.07);
+    color: var(--danger);
+  }
+
+  /* Typing indicator */
+  #typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 0;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  #typing-indicator.visible { display: flex; }
+
+  .typing-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: typing 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+    40%            { transform: scale(1);   opacity: 1; }
+  }
+
+  /* ─── Choices ──────────────────────────────────── */
+  #choices-area {
+    border-top: 1px solid var(--border);
+    background: var(--bg-panel);
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #choices-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+
+  #choices-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .choice-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    border-radius: var(--radius);
+    padding: 11px 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    line-height: 1.4;
+  }
+
+  .choice-btn .ch-key {
+    min-width: 22px;
+    height: 22px;
+    background: var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-sub);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .choice-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+    transform: translateY(-1px);
+  }
+
+  .choice-btn:hover .ch-key {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .choice-btn:active { transform: translateY(0); }
+
+
+  .choice-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ─── Scrollbar global ─────────────────────────── */
+  #left-panel::-webkit-scrollbar { width: 4px; }
+  #left-panel::-webkit-scrollbar-track { background: transparent; }
+  #left-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <div class="logo">
+      <div class="cross">✚</div>
+      Sıla'nın Kliniği
+    </div>
+
+    <div class="stat-chip">
+      <span class="dot"></span>
+      <span class="label">İtibar</span>
+      <span class="value rep" id="stat-rep">★ 4.8</span>
+    </div>
+
+    <div class="stat-chip">
+      <span class="label">Bütçe</span>
+      <span class="value gold" id="stat-budget">₺ 12.400</span>
+    </div>
+
+    <div class="stat-chip">
+      <span class="label">Gün</span>
+      <span class="value time" id="stat-time">Pazartesi · 09:15</span>
+    </div>
+  </header>
+
+  <div id="main-body">
+
+    <!-- LEFT PANEL -->
+    <aside id="left-panel">
+
+      <!-- Sıla Avatar -->
+      <div id="avatar-area">
+        <div id="avatar-canvas">
+          <img id="sila-sprite" src="sila.png.jpg" alt="Dr. Sıla" style="display:block;width:120px;height:150px;object-fit:cover;object-position:center top;">
+        </div>
+        <div class="avatar-name">Dr. Sıla</div>
+        <div class="avatar-title">Veteriner Hekim</div>
+      </div>
+
+      <!-- Vitals Monitor -->
+      <div class="panel-section">
+        <div class="section-title">Hasta · Hayati Değerler</div>
+        <div id="vitals-grid">
+
+          <!-- Heart Rate -->
+          <div class="vital-row">
+            <div class="vital-header">
+              <div class="vital-name"><span class="icon">♥</span> Kalp Ritmi</div>
+              <div class="vital-value ok" id="vital-hr">— bpm</div>
+            </div>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill" id="bar-hr" style="width:0%"></div>
+            </div>
+          </div>
+
+          <!-- ECG -->
+          <div id="ecg-container">
+            <canvas id="ecg-canvas" width="260" height="40"></canvas>
+          </div>
+
+          <!-- Temperature -->
+          <div class="vital-row">
+            <div class="vital-header">
+              <div class="vital-name"><span class="icon">🌡</span> Vücut Isısı</div>
+              <div class="vital-value ok" id="vital-temp">— °C</div>
+            </div>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill" id="bar-temp" style="width:0%; background:var(--warn)"></div>
+            </div>
+          </div>
+
+          <!-- Respiration -->
+          <div class="vital-row">
+            <div class="vital-header">
+              <div class="vital-name"><span class="icon">💨</span> Solunum</div>
+              <div class="vital-value ok" id="vital-resp">— /dk</div>
+            </div>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill" id="bar-resp" style="width:0%; background:#5c9ee0"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Patient Card -->
+      <div class="panel-section">
+        <div class="section-title">Hasta Kaydı</div>
+        <div id="patient-info">
+          <div class="patient-row">
+            <span class="key">Tür</span>
+            <span class="val" id="p-species"><span class="species-badge">—</span></span>
+          </div>
+          <div class="patient-row">
+            <span class="key">Ad</span>
+            <span class="val" id="p-name">—</span>
+          </div>
+          <div class="patient-row">
+            <span class="key">Yaş</span>
+            <span class="val" id="p-age">—</span>
+          </div>
+          <div class="patient-row">
+            <span class="key">Ağırlık</span>
+            <span class="val" id="p-weight">—</span>
+          </div>
+          <div class="patient-row">
+            <span class="key">Şikayet</span>
+            <span class="val" id="p-complaint">—</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL -->
+    <main id="right-panel">
+
+      <!-- Story Area -->
+      <div id="story-area">
+        <div id="story-header">
+          <span class="case-label">Vaka Dosyası</span>
+          <span class="case-id" id="case-id">— / —</span>
+        </div>
+
+        <div id="story-scroll">
+          <!-- Story entries injected by engine.js -->
+          <div class="story-entry">
+            <div class="who system">Sistem</div>
+            <div class="msg system">Klinik açılıyor... Dr. Sıla muayenehanesinde hazır.</div>
+          </div>
+        </div>
+
+        <div id="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <span style="margin-left:4px; font-size:12px;">Sıla değerlendiriyor…</span>
+        </div>
+      </div>
+
+      <!-- Choices Area -->
+      <div id="choices-area">
+        <div id="choices-label">Ne yaparsın?</div>
+        <div id="choices-grid">
+          <!-- Buttons injected by engine.js -->
+          <button class="choice-btn" disabled>
+            <span class="ch-key">A</span>
+            Vakayı Başlat
+          </button>
+          <button class="choice-btn" disabled>
+            <span class="ch-key">B</span>
+            —
+          </button>
+          <button class="choice-btn" disabled>
+            <span class="ch-key">C</span>
+            —
+          </button>
+          <button class="choice-btn" disabled>
+            <span class="ch-key">D</span>
+            —
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ── Sıla portresi SVG olarak sila-portrait.svg dosyasından yüklenir ──
+
+// ── ECG flat line placeholder ─────────────────────────────────────────────────
+(function drawFlatECG() {
+  const c = document.getElementById('ecg-canvas');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.strokeStyle = '#3fb950';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  ctx.moveTo(0, c.height/2);
+  ctx.lineTo(c.width, c.height/2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+})();
+</script>
+
+<!-- Game scripts will be loaded here -->
+<script src="engine.js"></script>
+<script src="player.js"></script>
+<script src="levels.js"></script>
+
+</body>
+</html>

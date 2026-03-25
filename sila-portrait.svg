@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" width="120" height="150">
+  <defs>
+    <!-- Ten: sıcak açık -->
+    <radialGradient id="fG" cx="46%" cy="28%" r="68%">
+      <stop offset="0%" stop-color="#FFD9A8"/>
+      <stop offset="100%" stop-color="#F0B47A"/>
+    </radialGradient>
+    <!-- Parlak kızıl saç (vivid red) -->
+    <linearGradient id="hG" x1="18%" y1="0%" x2="82%" y2="100%">
+      <stop offset="0%"   stop-color="#E83212"/>
+      <stop offset="52%"  stop-color="#C82008"/>
+      <stop offset="100%" stop-color="#921200"/>
+    </linearGradient>
+    <!-- Saç parlaklık overlay -->
+    <radialGradient id="hsG" cx="38%" cy="16%" r="54%">
+      <stop offset="0%"   stop-color="rgba(255,165,90,0.70)"/>
+      <stop offset="100%" stop-color="rgba(255,165,90,0)"/>
+    </radialGradient>
+    <!-- Önlük: beyaz -->
+    <linearGradient id="cG" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#F2F7FC"/>
+      <stop offset="100%" stop-color="#D2DFED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ═══ ÖNLÜK GÖVDESİ ═══ -->
+
+  <!-- Sol kol -->
+  <path d="M21,80 L13,88 L10,132 L19,134 L24,94 L27,81Z"
+        fill="url(#cG)" stroke="#BCCADA" stroke-width="1"/>
+  <!-- Sağ kol -->
+  <path d="M99,80 L107,88 L110,132 L101,134 L96,94 L93,81Z"
+        fill="url(#cG)" stroke="#BCCADA" stroke-width="1"/>
+
+  <!-- Önlük ana gövde -->
+  <path d="M21,80 L17,150 L103,150 L99,80 Q81,72 60,72 Q39,72 21,80Z"
+        fill="url(#cG)" stroke="#BCCADA" stroke-width="1"/>
+
+  <!-- Teal scrub yaka açıklığı -->
+  <path d="M51,80 L60,70 L69,80 L64,100 L56,100Z" fill="#2EA68A"/>
+
+  <!-- Yaka (lapel) sol -->
+  <path d="M60,76 L43,98 L47,150 L60,118Z"
+        fill="#E5EEF7" stroke="#B8C8D6" stroke-width="0.8"/>
+  <!-- Yaka (lapel) sağ -->
+  <path d="M60,76 L77,98 L73,150 L60,118Z"
+        fill="#E5EEF7" stroke="#B8C8D6" stroke-width="0.8"/>
+
+  <!-- Stetoskop — boyundan sarkan U şekli -->
+  <path d="M48,74 Q42,84 41,95 Q40,104 46,107"
+        fill="none" stroke="#2E3840" stroke-width="3" stroke-linecap="round"/>
+  <path d="M72,74 Q78,84 79,95 Q80,104 74,107"
+        fill="none" stroke="#2E3840" stroke-width="3" stroke-linecap="round"/>
+  <path d="M46,107 Q60,114 74,107"
+        fill="none" stroke="#2E3840" stroke-width="3"/>
+  <circle cx="60" cy="115" r="5.5" fill="#2E3840" stroke="#4A6070" stroke-width="1.2"/>
+  <circle cx="60" cy="115" r="2.5"  fill="#4888A0"/>
+
+  <!-- Önlük düğmeleri -->
+  <circle cx="60" cy="106" r="2"   fill="#A4B4C4"/>
+  <circle cx="60" cy="119" r="2"   fill="#A4B4C4"/>
+
+  <!-- Göğüs logosu: kedi silüeti (scrub üzerinde) -->
+  <g transform="translate(50,86)">
+    <ellipse cx="0" cy="2" rx="4.5" ry="3.5" fill="rgba(255,255,255,0.62)"/>
+    <!-- Kedi kulakları -->
+    <polygon points="-3,-1.5 -4.8,-5.5 -1.2,-3.5" fill="rgba(255,255,255,0.62)"/>
+    <polygon points="3,-1.5 4.8,-5.5 1.2,-3.5"   fill="rgba(255,255,255,0.62)"/>
+    <!-- Küçük kuyruk -->
+    <path d="M4.5,4 Q7,2 6.5,0" fill="none"
+          stroke="rgba(255,255,255,0.62)" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Sol el -->
+  <ellipse cx="12" cy="130" rx="8" ry="5.5" fill="#FFD9A8"
+           transform="rotate(-8,12,130)"/>
+
+  <!-- Tablet (sağ elde) -->
+  <rect x="93" y="110" width="19" height="27" rx="2.5"
+        fill="#232E3A" stroke="#182028" stroke-width="0.8"/>
+  <rect x="95.5" y="113" width="14" height="18" rx="1.5"
+        fill="#3A90B4" opacity="0.85"/>
+  <circle cx="102.5" cy="134.5" r="1.5" fill="#4A5A6A"/>
+  <!-- Sağ el (tableti tutuyor) -->
+  <ellipse cx="108" cy="124" rx="8" ry="5.5" fill="#FFD9A8"
+           transform="rotate(10,108,124)"/>
+
+  <!-- ═══ BOYUN ═══ -->
+  <rect x="54" y="68" width="12" height="10" rx="5" fill="#FFD9A8"/>
+  <ellipse cx="60" cy="77" rx="6" ry="2.5" fill="rgba(165,90,35,0.14)"/>
+
+  <!-- ═══ KULAKLAR ═══ -->
+  <ellipse cx="37"   cy="40" rx="5.5" ry="7.5" fill="#FFD9A8"/>
+  <ellipse cx="37.5" cy="40" rx="3"   ry="5"   fill="#F2A07A"/>
+  <ellipse cx="83"   cy="40" rx="5.5" ry="7.5" fill="#FFD9A8"/>
+  <ellipse cx="82.5" cy="40" rx="3"   ry="5"   fill="#F2A07A"/>
+
+  <!-- ═══ SAÇ — BOB KESİM (yüzden önce çizilir) ═══ -->
+
+  <!-- Tam saç silüeti: tepeden çene altına inen bob -->
+  <path d="M35,16 Q37,4 60,3 Q83,4 85,16
+           Q89,32 88,62 Q85,76 77,78
+           Q66,80 60,80 Q54,80 43,78
+           Q35,76 32,62
+           Q31,32 35,16Z"
+        fill="url(#hG)"/>
+
+  <!-- Saç parlaklık katmanı -->
+  <ellipse cx="55" cy="14" rx="19" ry="9" fill="url(#hsG)"/>
+
+  <!-- Saç yan doku çizgileri (sağ) -->
+  <path d="M86,35 Q87,52 86,66"
+        fill="none" stroke="rgba(110,18,2,0.20)"
+        stroke-width="1.4" stroke-linecap="round"/>
+  <!-- Saç yan doku çizgileri (sol) -->
+  <path d="M34,35 Q33,52 34,66"
+        fill="none" stroke="rgba(110,18,2,0.20)"
+        stroke-width="1.4" stroke-linecap="round"/>
+
+  <!-- ═══ YÜZ (saçın üstüne çizilir, merkezi açar) ═══ -->
+  <ellipse cx="60" cy="40" rx="23" ry="27" fill="url(#fG)"/>
+
+  <!-- Elmacık kemiği gölgesi (ince yüz) -->
+  <path d="M37,47 Q40.5,55 44.5,58"
+        fill="none" stroke="rgba(192,105,48,0.23)"
+        stroke-width="5" stroke-linecap="round"/>
+  <path d="M83,47 Q79.5,55 75.5,58"
+        fill="none" stroke="rgba(192,105,48,0.23)"
+        stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Çene gölgesi -->
+  <path d="M44,59 Q60,68 76,59"
+        fill="none" stroke="rgba(162,85,32,0.13)" stroke-width="5"/>
+
+  <!-- Al yanak (allık, belirgin) -->
+  <ellipse cx="42"  cy="52" rx="11.5" ry="7.5" fill="rgba(242,68,55,0.19)"/>
+  <ellipse cx="78"  cy="52" rx="11.5" ry="7.5" fill="rgba(242,68,55,0.19)"/>
+
+  <!-- ═══ PATLAMA / FRINGE (yüzün üstüne çizilir) ═══ -->
+  <!-- Patlama ana şekli -->
+  <path d="M35,16 Q37,4 60,3 Q83,4 85,16
+           Q87,26 85,32
+           Q74,30 60,30 Q46,30 35,32
+           Q33,26 35,16Z"
+        fill="url(#hG)"/>
+
+  <!-- Patlama alt kenar hafif vurgusu -->
+  <path d="M36,31.5 Q60,29 84,31.5"
+        fill="none" stroke="rgba(255,130,70,0.28)"
+        stroke-width="1.6" stroke-linecap="round"/>
+
+  <!-- Patlama saç doku çizgileri -->
+  <path d="M42,19 Q55,13 72,18"
+        fill="none" stroke="rgba(108,16,2,0.36)"
+        stroke-width="1.1" stroke-linecap="round"/>
+  <path d="M45,13 Q60,8 75,13"
+        fill="none" stroke="rgba(108,16,2,0.28)"
+        stroke-width="1" stroke-linecap="round"/>
+
+  <!-- ═══ KAŞLAR ═══ -->
+  <path d="M41,33.5 Q49.5,28.5 57.5,31.5"
+        fill="none" stroke="#8A2008"
+        stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M62.5,31.5 Q70.5,28.5 79,33.5"
+        fill="none" stroke="#8A2008"
+        stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- ═══ GÖZLER ═══ -->
+  <!-- Göz akları -->
+  <ellipse cx="48" cy="41" rx="8.5" ry="6.5" fill="white"/>
+  <ellipse cx="72" cy="41" rx="8.5" ry="6.5" fill="white"/>
+  <!-- İris -->
+  <circle cx="48" cy="41" r="5"   fill="#5A3210"/>
+  <circle cx="72" cy="41" r="5"   fill="#5A3210"/>
+  <!-- Göz bebeği -->
+  <circle cx="48" cy="41" r="2.9" fill="#120C06"/>
+  <circle cx="72" cy="41" r="2.9" fill="#120C06"/>
+  <!-- Işık noktaları -->
+  <circle cx="49.9" cy="39.2" r="1.8" fill="rgba(255,255,255,0.96)"/>
+  <circle cx="73.9" cy="39.2" r="1.8" fill="rgba(255,255,255,0.96)"/>
+  <circle cx="47"   cy="42.6" r="0.9" fill="rgba(255,255,255,0.50)"/>
+  <circle cx="71"   cy="42.6" r="0.9" fill="rgba(255,255,255,0.50)"/>
+  <!-- Üst göz kapağı -->
+  <path d="M39.5,38.5 Q48,34.5 56.5,38.5"
+        fill="none" stroke="rgba(34,14,4,0.78)" stroke-width="1.6"/>
+  <path d="M63.5,38.5 Q72,34.5 80.5,38.5"
+        fill="none" stroke="rgba(34,14,4,0.78)" stroke-width="1.6"/>
+  <!-- Alt göz kapağı (hafif) -->
+  <path d="M40.5,44.5 Q48,47 55.5,44.5"
+        fill="none" stroke="rgba(34,14,4,0.20)" stroke-width="1"/>
+  <path d="M64.5,44.5 Q72,47 79.5,44.5"
+        fill="none" stroke="rgba(34,14,4,0.20)" stroke-width="1"/>
+
+  <!-- ═══ BURUN (minimal, zarif) ═══ -->
+  <path d="M57.5,50 Q60,54 62.5,50"
+        fill="none" stroke="rgba(158,72,32,0.55)"
+        stroke-width="1.9" stroke-linecap="round"/>
+
+  <!-- ═══ GÜLÜMSEME — ince dudak, neşeli ═══ -->
+  <!-- Dudak dolgusu -->
+  <path d="M53.5,58 Q57,56 60,57 Q63,56 66.5,58
+           Q63.5,64 60,64.5 Q56.5,64 53.5,58Z"
+        fill="#C87272"/>
+  <!-- Gülümseme çizgisi -->
+  <path d="M54.5,58.5 Q60,64 65.5,58.5"
+        fill="none" stroke="#A05050"
+        stroke-width="1.3" stroke-linecap="round"/>
+  <!-- Üst dudak çizgisi -->
+  <path d="M55,58 Q57.5,56.5 60,57 Q62.5,56.5 65,58"
+        fill="none" stroke="#AE6060" stroke-width="1"/>
+  <!-- Gülümseme çukurları -->
+  <circle cx="51.5" cy="60" r="1.4" fill="rgba(186,72,66,0.37)"/>
+  <circle cx="68.5" cy="60" r="1.4" fill="rgba(186,72,66,0.37)"/>
+
+  <!-- ═══ GÖZLÜK — büyük yuvarlak, KOYU çerçeve ═══ -->
+  <!-- Cam dolgusu (hafif tint) -->
+  <circle cx="48" cy="41" r="12" fill="rgba(130,190,225,0.06)"/>
+  <circle cx="72" cy="41" r="12" fill="rgba(130,190,225,0.06)"/>
+  <!-- Koyu çerçeveler -->
+  <circle cx="48" cy="41" r="12" fill="none" stroke="#221208" stroke-width="2.9"/>
+  <circle cx="72" cy="41" r="12" fill="none" stroke="#221208" stroke-width="2.9"/>
+  <!-- Köprü -->
+  <path d="M59.2,40.8 Q60,38 60.8,40.8"
+        fill="none" stroke="#221208" stroke-width="2.4"/>
+  <!-- Kollar (kulaklara) -->
+  <line x1="36"  y1="40" x2="34"  y2="38"
+        stroke="#221208" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="84"  y1="40" x2="86"  y2="38"
+        stroke="#221208" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- Cam parlaklığı -->
+  <path d="M41,33.5 Q45.5,30 49,33.5"
+        fill="none" stroke="rgba(255,255,255,0.56)"
+        stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M65,33.5 Q69.5,30 73,33.5"
+        fill="none" stroke="rgba(255,255,255,0.56)"
+        stroke-width="1.5" stroke-linecap="round"/>
+</svg>

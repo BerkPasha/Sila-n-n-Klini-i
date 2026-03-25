@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sıla'nın Kliniği</title>
+<style>
+  /* ─── Reset & Base ─────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-dark:      #0d1117;
+    --bg-panel:     #161b22;
+    --bg-card:      #1c2330;
+    --border:       #30363d;
+    --accent:       #2ea68a;
+    --accent-soft:  #1a5c4e;
+    --accent-glow:  rgba(46,166,138,0.18);
+    --danger:       #e05c5c;
+    --warn:         #e8a838;
+    --ok:           #3fb950;
+    --text-main:    #e6edf3;
+    --text-muted:   #7d8590;
+    --text-sub:     #a8b3bf;
+    --font-mono:    'Courier New', monospace;
+    --font-ui:      'Segoe UI', system-ui, sans-serif;
+    --radius:       8px;
+    --radius-lg:    14px;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    overflow: hidden;
+  }
+
+  /* ─── Layout ───────────────────────────────────── */
+  #app {
+    display: grid;
+    grid-template-rows: 52px 1fr;
+    grid-template-columns: 1fr;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  #main-body {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* ─── Top Bar ──────────────────────────────────── */
+  #topbar {
+    grid-column: 1 / -1;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 24px;
+    z-index: 10;
+  }
+
+  #topbar .logo {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #topbar .logo .cross {
+    width: 20px; height: 20px;
+    background: var(--accent);
+    border-radius: 3px;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    color: #fff;
+  }
+
+  #topbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    pointer-events: none;
+  }
+
+  #topbar-center .clinic-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: 0.3px;
+  }
+
+  #topbar-center .clinic-tagline {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.2px;
+  }
+
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 13px;
+    font-size: 13px;
+    color: var(--text-sub);
+  }
+
+  .stat-chip .label { color: var(--text-muted); font-size: 11px; }
+  .stat-chip .value { font-weight: 600; }
+  .stat-chip .value.gold  { color: var(--warn); }
+  .stat-chip .value.rep   { color: var(--accent); }
+  .stat-chip .value.time  { color: var(--text-main); font-family: var(--font-mono); font-size: 13px; }
+
+  .stat-chip .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 6px var(--ok);
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+  }
+
+  /* ─── Left Panel ───────────────────────────────── */
+  #left-panel {
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+  }
+
+  .panel-section {
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .panel-section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  /* ─── Avatar ───────────────────────────────────── */
+  #avatar-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #avatar-canvas {
+    width: 120px;
+    height: 150px;
+    background: var(--bg-card);
+    border: 2px solid var(--accent-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 20px var(--accent-glow);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #avatar-canvas canvas {
+    image-rendering: pixelated;
+    display: block;
+  }
+
+  .avatar-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .avatar-title {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── Vitals Monitor ───────────────────────────── */
+  #vitals-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .vital-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .vital-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .vital-name {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .vital-name .icon { font-size: 13px; }
+
+  .vital-value {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--ok);
+  }
+
+  .vital-value.warn   { color: var(--warn); }
+  .vital-value.danger { color: var(--danger); animation: blink 0.6s infinite; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.2; }
+  }
+
+  .vital-bar-track {
+    height: 4px;
+    background: var(--bg-dark);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .vital-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--ok);
+    transition: width 0.6s ease, background 0.4s;
+  }
+
+  #ecg-container {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px;
+    margin-top: 4px;
+  }
+
+  #ecg-canvas {
+    display: block;
+    width: 100%;
+    height: 40px;
+  }
+
+  /* ─── Patient Card ─────────────────────────────── */
+  #patient-info {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .patient-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .patient-row .key   { color: var(--text-muted); }
+  .patient-row .val   { color: var(--text-main); font-weight: 600; }
+
+  .species-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ─── Right Panel ──────────────────────────────── */
+  #right-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-dark);
+  }
+
+  #story-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 20px 24px 12px;
+    gap: 14px;
+  }
+
+  #story-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #story-header .case-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  #story-header .case-id {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-left: auto;
+  }
+
+  #story-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  #story-scroll::-webkit-scrollbar { width: 4px; }
+  #story-scroll::-webkit-scrollbar-track { background: transparent; }
+  #story-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .story-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .story-entry .who {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent);
+  }
+
+  .story-entry .who.system { color: var(--text-muted); }
+
+  .story-entry .msg {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-main);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    white-space: pre-wrap;
+  }
+
+  .story-entry .msg.system {
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  .story-entry .msg.alert {
+    border-color: var(--danger);
+    background: rgba(224,92,92,0.07);
+    color: var(--danger);
+  }
+
+  #typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 0;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  #typing-indicator.visible { display: flex; }
+
+  .typing-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: typing 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+    40%            { transform: scale(1);   opacity: 1; }
+  }
+
+  /* ─── Choices ──────────────────────────────────── */
+  #choices-area {
+    border-top: 1px solid var(--border);
+    background: var(--bg-panel);
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #choices-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+
+  #choices-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .choice-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    border-radius: var(--radius);
+    padding: 11px 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    line-height: 1.4;
+  }
+
+  .choice-btn .ch-key {
+    min-width: 22px;
+    height: 22px;
+    background: var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-sub);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .choice-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+    transform: translateY(-1px);
+  }
+
+  .choice-btn:hover .ch-key {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .choice-btn:active { transform: translateY(0); }
+
+
+  .choice-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  #left-panel::-webkit-scrollbar { width: 4px; }
+  #left-panel::-webkit-scrollbar-track { background: transparent; }
+  #left-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <header id="topbar" style="position:relative;">
+    <div class="logo">
+      <div class="cross">✚</div>
+      Sıla'nın Kliniği
+    </div>
+
+    <div id="topbar-center">
+      <span class="clinic-name">Berk'in Mekanı</span>
+      <span class="clinic-tagline">İtinayla kedi, kuş, köpek bakılır.</span>
+    </div>
+    <div class="stat-chip">
+      <span class="dot"></span>
+      <span class="label">İtibar</span>
+      <span class="value rep" id="stat-rep">★ 4.8</span>
+    </div>
+    <div class="stat-chip">
+      <span class="label">Bütçe</span>
+      <span class="value gold" id="stat-budget">₺ 12.400</span>
+    </div>
+    <div class="stat-chip">
+      <span class="label">Gün</span>
+      <span class="value time" id="stat-time">Pazartesi · 09:15</span>
+    </div>
+  </header>
+
+  <div id="main-body">
+
+    <!-- LEFT PANEL -->
+    <aside id="left-panel">
+
+      <div id="avatar-area">
+        <div id="avatar-canvas">
+          <img id="sila-sprite" src="sila.png.jpg" alt="Dr. Sıla" style="display:block;width:120px;height:150px;object-fit:cover;object-position:center top;">
+        </div>
+        <div class="avatar-name">Dr. Sıla</div>
+        <div class="avatar-title">Veteriner Hekim</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Hasta · Hayati Değerler</div>
+        <div id="vitals-grid">
+
+          <div class="vital-row">
+            <div class="vital-header">
+              <div class="vital-name"><span class="icon">♥</span> Kalp Ritmi</div>
+              <div class="vital-value ok" id="vital-hr">— bpm</div>
+            </div>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill" id="bar-hr" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div id="ecg-container">
+            <canvas id="ecg-canvas" width="260" height="40"></canvas>
+          </div>
+
+          <div class="vital-row">
+            <div class="vital-header">
+              <div class="vital-name"><span class="icon">🌡</span> Vücut Isısı</div>
+              <div class="vital-value ok" id="vital-temp">— °C</div>
+            </div>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill" id="bar-temp" style="width:0%; background:var(--warn)"></div>
+            </div>
+          </div>
+
+          <div class="vital-row">
+            <div class="vital-header">
+              <div class="vital-name"><span class="icon">💨</span> Solunum</div>
+              <div class="vital-value ok" id="vital-resp">— /dk</div>
+            </div>
+            <div class="vital-bar-track">
+              <div class="vital-bar-fill" id="bar-resp" style="width:0%; background:#5c9ee0"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Hasta Kaydı</div>
+        <div id="patient-info">
+          <div class="patient-row">
+            <span class="key">Tür</span>
+            <span class="val" id="p-species"><span class="species-badge">—</span></span>
+          </div>
+          <div class="patient-row">
+            <span class="key">Ad</span>
+            <span class="val" id="p-name">—</span>
+          </div>
+          <div class="patient-row">
+            <span class="key">Yaş</span>
+            <span class="val" id="p-age">—</span>
+          </div>
+          <div class="patient-row">
+            <span class="key">Ağırlık</span>
+            <span class="val" id="p-weight">—</span>
+          </div>
+          <div class="patient-row">
+            <span class="key">Şikayet</span>
+            <span class="val" id="p-complaint">—</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL -->
+    <main id="right-panel">
+
+      <div id="story-area">
+        <div id="story-header">
+          <span class="case-label">Vaka Dosyası</span>
+          <span class="case-id" id="case-id">— / —</span>
+        </div>
+
+        <div id="story-scroll">
+          <div class="story-entry">
+            <div class="who system">Sistem</div>
+            <div class="msg system">Klinik açılıyor... Dr. Sıla muayenehanesinde hazır.</div>
+          </div>
+        </div>
+
+        <div id="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <span style="margin-left:4px; font-size:12px;">Sıla değerlendiriyor…</span>
+        </div>
+      </div>
+
+      <div id="choices-area">
+        <div id="choices-label">Ne yaparsın?</div>
+        <div id="choices-grid">
+          <button class="choice-btn" disabled>
+            <span class="ch-key">A</span>Yükleniyor…
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PLAYER.JS — Klinik & Hasta State
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+const Player = (() => {
+
+  const SPECIES_NORMS = {
+    cat:  { hrMin: 120, hrMax: 140, tempMin: 38.1, tempMax: 39.2, respMin: 20, respMax: 30 },
+    dog:  { hrMin:  60, hrMax: 120, tempMin: 38.0, tempMax: 39.5, respMin: 15, respMax: 30 },
+    bird: { hrMin: 250, hrMax: 350, tempMin: 40.0, tempMax: 42.0, respMin: 25, respMax: 40 },
+  };
+
+  const DEATH_LIMITS = {
+    hrMin: 0, hrMax: 400, tempMin: 34.0, tempMax: 43.5, respMin: 0, respMax: 80,
+  };
+
+  let clinicStats = { budget: 12400, reputation: 4.8, totalCases: 0, wins: 0, losses: 0 };
+
+  let currentPatient = {
+    species: null, name: null, age: null, weight: null, complaint: null,
+    vitals: { heartRate: 0, temperature: 0, respiration: 0, hrNormal: { min: 60, max: 140 } },
+    isDead: false, deathCause: null,
+  };
+
+  let caseNumber = 0;
+
+  function getState() {
+    return {
+      budget: clinicStats.budget, reputation: clinicStats.reputation,
+      totalCases: clinicStats.totalCases, wins: clinicStats.wins, losses: clinicStats.losses,
+      caseNumber,
+      patient: {
+        species: currentPatient.species, name: currentPatient.name,
+        age: currentPatient.age, weight: currentPatient.weight, complaint: currentPatient.complaint,
+      },
+      vitals: {
+        heartRate: currentPatient.vitals.heartRate, temperature: currentPatient.vitals.temperature,
+        respiration: currentPatient.vitals.respiration, hrNormal: currentPatient.vitals.hrNormal,
+      },
+      isDead: currentPatient.isDead, deathCause: currentPatient.deathCause,
+    };
+  }
+
+  function initCase(caseData) {
+    caseNumber++;
+    clinicStats.totalCases++;
+    const norms = SPECIES_NORMS[caseData.patient.species] || SPECIES_NORMS.dog;
+    currentPatient = {
+      species: caseData.patient.species, name: caseData.patient.name,
+      age: caseData.patient.age, weight: caseData.patient.weight, complaint: caseData.patient.complaint,
+      vitals: {
+        heartRate: caseData.patient.vitals.heartRate, temperature: caseData.patient.vitals.temperature,
+        respiration: caseData.patient.vitals.respiration, hrNormal: { min: norms.hrMin, max: norms.hrMax },
+      },
+      isDead: false, deathCause: null,
+    };
+  }
+
+  function clamp(val, min, max) { return Math.min(max, Math.max(min, val)); }
+
+  function updateVitals(hrChange = 0, tempChange = 0, respChange = 0) {
+    const v = currentPatient.vitals;
+    v.heartRate   = clamp(v.heartRate   + hrChange,   DEATH_LIMITS.hrMin,   DEATH_LIMITS.hrMax);
+    v.temperature = clamp(v.temperature + tempChange,  DEATH_LIMITS.tempMin, DEATH_LIMITS.tempMax);
+    v.respiration = clamp(v.respiration + respChange,  DEATH_LIMITS.respMin, DEATH_LIMITS.respMax);
+  }
+
+  function setVitals(vals = {}) {
+    const v = currentPatient.vitals;
+    if (vals.heartRate   !== undefined) v.heartRate   = clamp(vals.heartRate,   DEATH_LIMITS.hrMin,   DEATH_LIMITS.hrMax);
+    if (vals.temperature !== undefined) v.temperature = clamp(vals.temperature, DEATH_LIMITS.tempMin, DEATH_LIMITS.tempMax);
+    if (vals.respiration !== undefined) v.respiration = clamp(vals.respiration, DEATH_LIMITS.respMin, DEATH_LIMITS.respMax);
+  }
+
+  function applyEffects(effects = {}) {
+    if (!effects) return;
+    updateVitals(effects.hrDelta || 0, effects.tempDelta || 0, effects.respDelta || 0);
+    setVitals({ heartRate: effects.hrSet, temperature: effects.tempSet, respiration: effects.respSet });
+    if (effects.budgetDelta !== undefined) clinicStats.budget = Math.max(0, clinicStats.budget + effects.budgetDelta);
+    if (effects.repDelta    !== undefined) clinicStats.reputation = clamp(clinicStats.reputation + effects.repDelta, 0, 5.0);
+    if (effects.killPatient) {
+      currentPatient.vitals.heartRate   = 0;
+      currentPatient.vitals.respiration = 0;
+      currentPatient.isDead   = true;
+      currentPatient.deathCause = effects.deathCause || 'Bilinmeyen sebep';
+    }
+  }
+
+  function isPatientDead() {
+    if (currentPatient.isDead) return true;
+    const v = currentPatient.vitals;
+    if (v.heartRate <= 0)                    { currentPatient.isDead = true; currentPatient.deathCause = 'Kardiyak arrest'; return true; }
+    if (v.heartRate >= DEATH_LIMITS.hrMax)   { currentPatient.isDead = true; currentPatient.deathCause = 'Ventriküler fibrilasyon'; return true; }
+    if (v.temperature <= DEATH_LIMITS.tempMin){ currentPatient.isDead = true; currentPatient.deathCause = 'Hipotermik şok'; return true; }
+    if (v.temperature >= DEATH_LIMITS.tempMax){ currentPatient.isDead = true; currentPatient.deathCause = 'Hipertermik koma'; return true; }
+    if (v.respiration <= DEATH_LIMITS.respMin){ currentPatient.isDead = true; currentPatient.deathCause = 'Solunum durması (apne)'; return true; }
+    return false;
+  }
+
+  function recordWin()  { clinicStats.wins++;   clinicStats.reputation = clamp(clinicStats.reputation + 0.1, 0, 5.0); clinicStats.budget += 500; }
+  function recordLoss() { clinicStats.losses++; clinicStats.reputation = clamp(clinicStats.reputation - 0.2, 0, 5.0); }
+
+  return { getState, initCase, applyEffects, updateVitals, setVitals, isPatientDead, recordWin, recordLoss };
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LEVELS.JS — Vaka Ağacı
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+const Levels = (() => {
+
+  const CASE_1 = {
+    id: 'case1', startNodeId: 'c1_giris',
+    patient: {
+      species: 'dog', name: 'Pamuq', age: '4 aylık', weight: '5,2 kg',
+      complaint: 'Kanlı ishal, şiddetli kusma, letarji',
+      vitals: { heartRate: 155, temperature: 39.9, respiration: 36 },
+    },
+  };
+
+  const CASE_2 = {
+    id: 'case2', startNodeId: 'c2_giris',
+    patient: {
+      species: 'bird', name: 'Mavi', age: '3 yaşında', weight: '86 g',
+      complaint: 'Kabarma, halsizlik, tabanda durma, ıkınma',
+      vitals: { heartRate: 310, temperature: 38.2, respiration: 48 },
+    },
+  };
+
+  const ALL_CASES = [CASE_1, CASE_2];
+
+  const NODES = {
+
+    // ── VAKA 1 ──────────────────────────────────────────────────────────────
+
+    c1_giris: {
+      id: 'c1_giris', type: 'normal',
+      text: `Kapı açılıyor: İçeri genç bir çift, kollarında hâlsiz, gözleri yarı kapalı sarı tüylü bir Golden yavrusu giriyor. Tüyleri donuk ve nemli. Muayene masasına yavaşça yatırılıyor.\n\n"Sabahtan beri böyle Dr. Hanım… Hiç durmadan kusup durdu, dışkısında kan var. İçmiyor, yemiyor. Aşıları yaptırmayı unuttuk…"\n\nİlk fizik muayenede gözler çukura kaçmış, kapiller dolum zamanı 3 saniye, deri elastikiyeti belirgin azalmış. Hasta %8–10 dehidratasyon tablosunda.`,
+      choices: [
+        { label: 'Detaylı anamnez al (yaş, aşı durumu, beslenme)', nextNodeId: 'c1_anamnez', effects: { budgetDelta: 0 } },
+        { label: 'Anamnezi atla, direkt semptomatik tedavi başlat', nextNodeId: 'c1_anamnez_atlama', isDangerous: true, effects: { repDelta: -0.1 } },
+      ],
+    },
+
+    c1_anamnez: {
+      id: 'c1_anamnez', type: 'normal',
+      text: `"Pamuq 4 aylık. Hiç aşısı yok. 3 gün önce dışarıda diğer köpeklerle oynadı. O günden beri önce iştahsızlık başladı, sonra kusma, sonra kanlı ishal…"\n\nFizik muayene bulguları:\n• Kalp ritmi: 155 bpm (taşikardi)\n• Ateş: 39.9°C\n• Mukozalar: soluk ve yapışkan\n• Kanlı, çürük balık gibi kokan ishal\n• Batın palpasyonunda ağrı ve gaz\n\nKlinik tablo Parvoviral Enterit ile yüksek uyumlu. Ancak tanıyı doğrulamak gerekiyor.`,
+      choices: [
+        { label: 'SNAP Parvo Antijen Testi iste (gaita örneği)', nextNodeId: 'c1_parvo_test', effects: { budgetDelta: -120 } },
+        { label: 'Besin zehirlenmesi say, eve gönder + metronidazol yaz', nextNodeId: 'c1_yanlis_tani', isDangerous: true, effects: { hrDelta: +25, tempDelta: +0.6, respDelta: +8, budgetDelta: -30, repDelta: -0.3 } },
+        { label: 'Sadece tam kan sayımı + biyokimya iste', nextNodeId: 'c1_sadece_kan', effects: { budgetDelta: -200 } },
+      ],
+    },
+
+    c1_anamnez_atlama: {
+      id: 'c1_anamnez_atlama', type: 'alert',
+      text: `Anamnez alınmadan direkt IV serum başlatıldı. Hasta stabilize ediliyor gibi görünse de tanı konulmadığı için özgün tedavi yapılamıyor. Saatler geçiyor; Pamuq giderek kötüleşiyor.\n\nSahibi: "Doktor ne olduğunu hâlâ bilmiyoruz, bu ne iş?"\n\nSistematik yaklaşım olmadan kaynak bulunamaz — klinik itibarınız sarsıldı.`,
+      choices: [
+        { label: 'Şimdi anamnez al ve teşhise yönel', nextNodeId: 'c1_anamnez', effects: { hrDelta: +10, tempDelta: +0.3, repDelta: -0.1 } },
+      ],
+    },
+
+    c1_sadece_kan: {
+      id: 'c1_sadece_kan', type: 'alert',
+      text: `Tam kan sayımı sonuçları geldi:\n• Lökosit: 1.200/μL → Ağır lökopeni (parvonun pençe izi)\n• Hematokrit: %48 → Hemokonsentrasyon (dehidrasyon)\n• Albumin: 1.8 g/dL → Hipoalbuminemi\n• BUN/Kreatinin: Normal\n\nBu tablo tek başına Parvoviral Enterit'i kuvvetle destekliyor. Ancak tedavi kararı için kesin antijen testi gerekli.\n\nVakit kaybedildi; hasta biraz daha kötüleşti.`,
+      choices: [
+        { label: 'Şimdi SNAP Parvo Testi iste', nextNodeId: 'c1_parvo_test', effects: { hrDelta: +8, tempDelta: +0.2, budgetDelta: -120 } },
+        { label: 'Kan sonuçlarına bakarak tedavi başlat (teste gerek yok)', nextNodeId: 'c1_tedavi_secimi', effects: {} },
+      ],
+    },
+
+    c1_parvo_test: {
+      id: 'c1_parvo_test', type: 'alert',
+      text: `Gaita örneği alındı. Lateralflow SNAP CPV Antijen Testi uygulandı.\n\n⏱ 5 dakika bekleniyor…\n\n📋 SONUÇ: POZİTİF ✔\nKontrol çizgisi + Test çizgisi → Canine Parvovirus Type 2 konfirme.\n\nTanı: Parvoviral Hemorajik Gastroenterit\n\nHastanın durumu kritik. Sıvı kaybı devam ediyor, endotoksemik şok kapıda. Her dakika değerli — tedavi protokolünü seç.`,
+      choices: [
+        { label: 'IV Laktatlı Ringer + Ampisilin + Maropitant', nextNodeId: 'c1_dogru_tedavi', effects: { budgetDelta: -380 } },
+        { label: 'IV Laktatlı Ringer + Enrofloksasin + Maropitant', nextNodeId: 'c1_enro_tedavi', isDangerous: true, effects: { budgetDelta: -350 } },
+        { label: 'IV Laktatlı Ringer + Gentamisin + Maropitant', nextNodeId: 'c1_gentamisin_olum', isDangerous: true, effects: { budgetDelta: -320, hrDelta: -15, tempDelta: +0.3 } },
+        { label: 'Sadece antiemetik (Metoklopramid), sıvı ve antibiyotik yok', nextNodeId: 'c1_sivi_yok', isDangerous: true, effects: { hrDelta: +20, tempDelta: +0.5, respDelta: +5, budgetDelta: -40 } },
+      ],
+    },
+
+    c1_yanlis_tani: {
+      id: 'c1_yanlis_tani', type: 'death',
+      text: `Pamuq eve gönderildi. Metronidazol kapsülleri yutamadı zaten — sürekli kusuyor.\n\nSaat 22:00 — Sahipleri çılgına dönerek geri geldi. Pamuq artık başını bile kaldıramıyor. Mukozalar gri, nabız iplik gibi, kapiller dolum 5 saniye.\n\nAcil destekleyici tedavi başlatıldı ama çok geç.\n\nSabah 04:00 — Pamuq hayatını kaybetti.\n\n💀 ÖLÜM SEBEBİ: Parvoviral sepsis + hipovolemik şok\n\n→ Besin zehirlenmesi teşhisi hayat kurtarıcı tedaviyi geciktirdi. Parvo antijen testi 120₺'ye mal olacaktı. Pamuq 5 dakika bekleyebilirdi.`,
+    },
+
+    c1_sivi_yok: {
+      id: 'c1_sivi_yok', type: 'death',
+      text: `Metoklopramid verildi. Kusma geçici olarak yavaşladı.\n\nAncak IV sıvı başlanmadığı için %10 dehidrasyon giderek kötüleşiyor. Bağırsak bariyeri çöküyor, endotoksinler kana karışıyor.\n\n2 saat sonra:\n• Kalp ritmi: 38 bpm → bradikardi (şok)\n• Sıcaklık: 34.1°C → Hipotermi\n• Solunum: 8/dk → Apne eşiği\n\nKardiyopulmoner resüsitasyon başlatıldı. 18 dakika sürdü.\n\n💀 ÖLÜM SEBEBİ: Hipovolemik + septik şok, kardiyak arrest\n\n→ Parvoviral enteritte sıvı tedavisi tartışmasız en kritik adımdır. Antiemetik tek başına yetersizdir.`,
+    },
+
+    c1_enro_tedavi: {
+      id: 'c1_enro_tedavi', type: 'alert',
+      text: `IV Laktatlı Ringer + Enrofloksasin + Maropitant başlandı.\n\n⚠ Klinik not: Enrofloksasin (florokinolon grubu) 4 aylık bir köpekte kontrendike. Büyüme plakalarına toksik; kıkırdak hasarı ve eklem patolojileri yapabilir.\n\n24 saat sonra: Sıvı tedavisi işe yarıyor, kusma azaldı. Ancak Pamuq arka bacaklarını garip bir şekilde kullanıyor — hareket etmekte zorlanıyor.\n\nSahipler fark etti: "Neden yürüyemiyor?"\n\nKıkırdak hasarı oluştu. Pamuq hayatta kalacak — ama uzun vadede eklem problemleriyle boğuşacak.`,
+      choices: [
+        { label: 'Enrofloksasini kes, Ampisiline geç ve özür dile', nextNodeId: 'c1_enro_dustak', effects: { hrDelta: -20, tempDelta: -0.4, respDelta: -8, repDelta: -0.4, budgetDelta: -100 } },
+        { label: 'Devam et, antibiyotik kesilmez', nextNodeId: 'c1_enro_devam', isDangerous: true, effects: { hrDelta: -5, repDelta: -0.3 } },
+      ],
+    },
+
+    c1_enro_dustak: {
+      id: 'c1_enro_dustak', type: 'normal',
+      text: `Enrofloksasin kesildi. Ampisilin-sulbaktam başlandı. Ortopedik konsültasyon planlandı.\n\nPamuq yavaş yavaş toparlanıyor; sıvı tedavisi sürdü, kusma ve ishal geçiyor. Ancak sol arka bacakta hafif topallık kalıcı olabilir.\n\nSahiplere durum dürüstçe anlatıldı. Üzgünler ama anlayış gösterdiler.\n\nKlinik itibarınız hasar gördü — ama en azından Pamuq hayatta.`,
+      choices: [
+        { label: 'Destek tedavisine devam et ve taburculuk planla', nextNodeId: 'c1_taburculuk_zor', effects: { hrDelta: -15, tempDelta: -0.3, respDelta: -6, budgetDelta: -200 } },
+      ],
+    },
+
+    c1_enro_devam: {
+      id: 'c1_enro_devam', type: 'death',
+      text: `Enrofloksasin devam etti. Pamuq akut artropatiye girdi — eklemler şişti, ağrıdan yürüyemiyor.\n\nSahipler kliniği sosyal medyada şikayet etti. Veteriner Hekimler Odası'na başvurdu.\n\n📉 İtibar: 1.2 / 5.0\n\n⚠ UYARI: Florokinolonlar kondrotoksik etkilerinden dolayı 12 aydan küçük köpeklerde kesinlikle kontrendikedir.`,
+    },
+
+    c1_taburculuk_zor: {
+      id: 'c1_taburculuk_zor', type: 'normal',
+      text: `72 saat yoğun bakım sonrası Pamuq taburcu edildi. Kusma ve ishal durdu. Ancak hafif topallık devam ediyor — 3 ay sonra kontrol önerildi.\n\nBu vaka gelecekte bir hatırlatıcı olacak: Florokinolonları küçük hastalara verme.`,
+      choices: [
+        { label: 'Vakayı kapat, yeni hastaya geç', nextNodeId: 'c1_basari_zor', effects: {} },
+      ],
+    },
+
+    c1_basari_zor: {
+      id: 'c1_basari_zor', type: 'success',
+      text: `✓ Vaka Kapatıldı — Kısmi Başarı\n\nPamuq hayatta. Parvoviral enterit atlatıldı. Ancak yanlış antibiyotik seçimi kıkırdak hasarına yol açtı.\n\nBilgi notu: Parvoviral enteritte tercih edilecek antibiyotikler ampisilin, amoksisilin-klavulanat veya sefazolin'dir. Florokinolonlar yalnızca yetişkin köpeklerde ve kesin endikasyonla kullanılır.`,
+    },
+
+    c1_gentamisin_olum: {
+      id: 'c1_gentamisin_olum', type: 'death',
+      text: `IV Laktatlı Ringer + Gentamisin + Maropitant başlandı.\n\nKlinik not — UYARI:\nGentamisin (aminoglikozid) ciddi derecede dehidrate, hipoalbuminemik bir hastada akut nefrotoksisiteye yol açar.\n\n6 saat sonra:\n• İdrar çıkışı durdu → Oligüri\n• BUN: 148 mg/dL, Kreatinin: 8.2 mg/dL → Akut böbrek yetmezliği\n• Kalp ritmi: 22 bpm → Hiperkalemiye bağlı ağır bradikardi\n• Solunum: 4/dk → Apne\n\n💀 ÖLÜM SEBEBİ: Akut aminoglikozid nefrotoksisitesi + hiperkalemik kardiyak arrest\n\n→ Aminoglikozidler dehidrate, hipoalbuminemik hayvanlarda KESİNLİKLE kullanılmaz.`,
+    },
+
+    c1_tedavi_secimi: {
+      id: 'c1_tedavi_secimi', type: 'normal',
+      text: `Kan tahlili sonuçlarına göre Parvoviral Enterit tanısı güçlü. Tedavi protokolünü seç:`,
+      choices: [
+        { label: 'IV Laktatlı Ringer + Ampisilin + Maropitant', nextNodeId: 'c1_dogru_tedavi', effects: { budgetDelta: -380 } },
+        { label: 'IV Laktatlı Ringer + Enrofloksasin + Maropitant', nextNodeId: 'c1_enro_tedavi', isDangerous: true, effects: { budgetDelta: -350 } },
+        { label: 'IV Laktatlı Ringer + Gentamisin + Maropitant', nextNodeId: 'c1_gentamisin_olum', isDangerous: true, effects: { budgetDelta: -320, hrDelta: -15, tempDelta: +0.3 } },
+      ],
+    },
+
+    c1_dogru_tedavi: {
+      id: 'c1_dogru_tedavi', type: 'normal',
+      text: `Tedavi başladı:\n\n💉 IV Laktatlı Ringer Solusyonu — 90 mL/kg/24h (şok dozu, yavaş titre)\n💊 Ampisilin-Sulbaktam — 22 mg/kg IV q8h\n💊 Maropitant (Cerenia) — 1 mg/kg SC\n\n4 saat sonra kontrol:\n• Kalp ritmi: 128 bpm ↓ (iyileşiyor)\n• Sıcaklık: 39.2°C ↓ (normale yaklaşıyor)\n• Kapiller dolum: 2 sn (düzeldi)\n• Kusma frekansı: belirgin azaldı\n\nHasta cevap veriyor. Sıradaki adım: Beslenme desteği.`,
+      choices: [
+        { label: '24 saat NPO (ağızdan hiçbir şey verme), sonra sıvı elektrolit ile başla', nextNodeId: 'c1_dogru_beslenme', effects: { hrDelta: -18, tempDelta: -0.5, respDelta: -10, budgetDelta: -50 } },
+        { label: 'Hemen mama ver — zayıf düşmemeli', nextNodeId: 'c1_yanlis_beslenme', isDangerous: true, effects: { hrDelta: +12, tempDelta: +0.2, respDelta: +5 } },
+        { label: 'Zorunlu nazogastrik tüp ile yüksek proteinli mama', nextNodeId: 'c1_yanlis_beslenme', isDangerous: true, effects: { hrDelta: +15, tempDelta: +0.3, respDelta: +6 } },
+      ],
+    },
+
+    c1_yanlis_beslenme: {
+      id: 'c1_yanlis_beslenme', type: 'alert',
+      text: `Pamuq verilen mamayı anında kustu. Mide ve bağırsak mukozası henüz toparlanmamış — erken enteral yükleme inflamasyonu artırdı.\n\n⚠ Aspirasyon pnömonisi riski doğdu. Solunum takibe alındı.\n\nNeyse ki kritik değerlere ulaşmadı — ama iyileşme süreci uzadı ve bütçe arttı.`,
+      choices: [
+        { label: 'NPO uygula, doğru protokole dön', nextNodeId: 'c1_dogru_beslenme', effects: { hrDelta: -5, tempDelta: -0.1, respDelta: -4, budgetDelta: -150, repDelta: -0.05 } },
+      ],
+    },
+
+    c1_dogru_beslenme: {
+      id: 'c1_dogru_beslenme', type: 'normal',
+      text: `24 saat NPO. Ardından %5 glukoz + elektrolit solüsyonu ile ağız yolu açıldı. 48. saatte düşük yağlı, kolay sindirilebilir ıslak mama başlandı.\n\nParvo pozitif hastanın diğer hayvanlarla teması için sahipler bilgilendirildi.\n\n72 saat sonra son muayene:\n• Kalp ritmi: 108 bpm ✓\n• Sıcaklık: 38.7°C ✓\n• Solunum: 22/dk ✓\n• İshal ve kusma: Durdu\n• Pamuq başını kaldırıp kuyruk sallıyor.\n\nTaburculuk kararı?`,
+      choices: [
+        { label: 'Taburcu et — ev bakımı talimatları ve takip randevusu ver', nextNodeId: 'c1_taburculuk', effects: { hrSet: 108, tempSet: 38.7, respSet: 22, budgetDelta: +500, repDelta: +0.2 } },
+        { label: '1 gün daha gözlemde tut (ihtiyatlı yaklaşım)', nextNodeId: 'c1_ek_gozlem', effects: { budgetDelta: -180, repDelta: +0.05 } },
+      ],
+    },
+
+    c1_ek_gozlem: {
+      id: 'c1_ek_gozlem', type: 'normal',
+      text: `Pamuq 1 gün daha klinikte kaldı. Tüm vitaller stabil seyretti. Sabah mama yedi, su içti. Sahibine doğru koştu.\n\nEk gözlem gereksizdi ama klinisyenin temkinli tutumu sahibi çok memnun etti.`,
+      choices: [
+        { label: 'Taburcu et', nextNodeId: 'c1_taburculuk', effects: { budgetDelta: +500, repDelta: +0.15 } },
+      ],
+    },
+
+    c1_taburculuk: {
+      id: 'c1_taburculuk', type: 'normal',
+      text: `Taburculuk talimatları verildi:\n\n✅ 7 gün boyunca düşük yağlı, kolay sindirilebilir diyet\n✅ Bol taze su erişimi\n✅ 10 gün sonra rutin kontrol\n✅ 2 hafta sonra ilk aşı serisi başlanmalı (Parvo + Distemper)\n✅ Diğer köpeklerden 3 hafta izolasyon (viral saçılım devam eder)\n\nSahipler gözyaşlarıyla teşekkür etti. Pamuq muayene masasından zıplayarak indi.`,
+      choices: [
+        { label: 'Vakayı kapat', nextNodeId: 'c1_basari', effects: { repDelta: +0.05 } },
+      ],
+    },
+
+    c1_basari: {
+      id: 'c1_basari', type: 'success',
+      text: `🏆 VAKA BAŞARIYLA TAMAMLANDI\n\nParvoviral Hemorajik Gastroenterit — Tam İyileşme\n\nDoğru adımlar:\n✓ Sistematik anamnez\n✓ SNAP Parvo antijen testi ile konfirmasyon\n✓ IV Laktatlı Ringer ile agresif rehidrasyon\n✓ Ampisilin (uygun antibiyotik seçimi)\n✓ Maropitant (santral + periferik antiemetik)\n✓ NPO → Kademeli enteral beslenme geçişi\n\n"Veteriner hekimlikte her saniye sayılır — ama her karar daha çok sayılır." — Dr. Sıla`,
+    },
+
+    // ── VAKA 2 ──────────────────────────────────────────────────────────────
+
+    c2_giris: {
+      id: 'c2_giris', type: 'normal',
+      text: `Küçük bir kutu içinde titreyen bir Sultan Papağanı getirildi. Sahibi endişeli:\n\n"Dün akşamdan beri kafes tabanına oturuyor, tüyleri kabarık, ıkınıp duruyor ama bir şey çıkmıyor. Normalde çok hareketli olurdu…"\n\nİlk gözlem:\n• Tüyler kabarık — hipotermi belirtisi\n• Kafes tabanında hareketsiz duruş — ağır hastalık işareti\n• Karın bölgesi belirgin şişkin\n• Mukus membranlarda solgunluk\n• Sürekli ıkınma hareketi\n\n⚠ Kuşlar strese son derece hassastır. Yanlış müdahale kalp krizine yol açabilir.`,
+      choices: [
+        { label: 'Nazik fizik muayene + karın palpasyonu + radyografi', nextNodeId: 'c2_muayene', effects: { budgetDelta: -180 } },
+        { label: 'Hemen elle muayene et — kaba palpasyon', nextNodeId: 'c2_kaba_muayene', isDangerous: true, effects: { hrDelta: +60, tempDelta: -0.8, respDelta: +15 } },
+        { label: 'Doğrudan yumurtayı elle çıkarmaya çalış', nextNodeId: 'c2_manuel_olum', isDangerous: true, effects: { killPatient: true, deathCause: 'Stres kaynaklı kardiyak arrest + yumurta rüptürü' } },
+      ],
+    },
+
+    c2_kaba_muayene: {
+      id: 'c2_kaba_muayene', type: 'death',
+      text: `Papağan tutuldu ve güçlü bir palpasyon uygulandı.\n\nKuşlar avian olarak memelilerden çok farklı fizyolojiye sahiptir. Stres hormonları (katekolaminler) saniyeler içinde kardiyak aritmiye yol açabilir.\n\n30 saniye içinde:\n• Kalp ritmi: 420 bpm → Ventriküler taşikardi\n• Papağan aniden durdu, gözler kapandı\n• Resüsitasyon: Kuşlarda kardiyak masaj anatomik imkânsız\n\n💀 ÖLÜM SEBEBİ: Akut stres kaynaklı kardiyak arrest (capture myopathy)\n\n→ Kuş muayenesi MİNİMAL STRES ilkesiyle yapılır.`,
+    },
+
+    c2_manuel_olum: {
+      id: 'c2_manuel_olum', type: 'death',
+      text: `Yumurta elle çıkarılmaya çalışıldı.\n\nYumurta kırıldı — kabuk parçaları ovidukta kaldı. Yolk (sarısı) karın boşluğuna sızdı.\n\nSonraki 12 saat içinde:\n• Yolk peritoniti gelişti\n• Ağır sepsis\n• Kalp ritmi: 80 bpm (normal 280+)\n• Solunum durdu\n\n💀 ÖLÜM SEBEBİ: İyatrojenik yumurta rüptürü → Yolk peritoniti → Septisemi\n\n→ Yumurta tıkanmasında ASLA kör manuel müdahale yapılmaz.`,
+    },
+
+    c2_muayene: {
+      id: 'c2_muayene', type: 'alert',
+      text: `Radyografi çekildi.\n\n📋 Bulgular:\n• Kloaka bölgesinde 2.1 cm çapında, kalsifiye bir yumurta görüntüsü\n• Yumurta pelvis çıkımını tamamen tıkamış\n• Karın içi organlar kraniale doğru itilmiş\n• Yumurta kabuğu bütünlüğü korunuyor (iyi haber)\n\nTanı: Egg Binding (Yumurta Distozisi) — konfirme\n\nHastanın hayati değerleri:\n• Kalp: 310 bpm (stres taşikardisi)\n• Isı: 38.2°C → Hipotermi! (normal kuş: 40–42°C)\n• Solunum: 48/dk (taşipne)\n\n⏰ Öncelik: Hasta stabilize edilmeden HİÇBİR müdahale yapılmamalı.`,
+      choices: [
+        { label: 'Stabilizasyon: Isıtma (28–32°C kuluçka kutusu) + Oksijen', nextNodeId: 'c2_stabil', effects: { hrDelta: -30, tempDelta: +1.2, respDelta: -8, budgetDelta: -60 } },
+        { label: 'Stabilizasyonu atla, hemen ilaç başlat', nextNodeId: 'c2_stabil_atlama', isDangerous: true, effects: { hrDelta: +20, tempDelta: -0.3 } },
+      ],
+    },
+
+    c2_stabil_atlama: {
+      id: 'c2_stabil_atlama', type: 'alert',
+      text: `Isıtma yapılmadan Kalsiyum enjeksiyonu uygulandı. Ancak hipotermi nedeniyle ilaç metabolizması bozulmuş — kalsiyum hücre düzeyinde çalışamıyor.\n\nPapağan titremeye devam ediyor, ıkınma geçmedi.\n\n2 saat boşa harcandı. İtibar hasar gördü — ama hasta henüz kurtarılabilir.`,
+      choices: [
+        { label: 'Şimdi ısıtma + oksijen uygula ve protokole dön', nextNodeId: 'c2_stabil', effects: { hrDelta: -10, tempDelta: +0.6, repDelta: -0.1, budgetDelta: -60 } },
+      ],
+    },
+
+    c2_stabil: {
+      id: 'c2_stabil', type: 'normal',
+      text: `Hasta kuluçka kutusuna alındı (30°C, %60 nem). Oksijen desteği başlandı (%40 O₂).\n\n45 dakika sonra:\n• Kalp ritmi: 275 bpm ↓ (stabilize oldu)\n• Sıcaklık: 39.8°C ↑ (normale ulaştı)\n• Solunum: 38/dk ↓\n• Hasta hafifçe ötmeye başladı — iyi işaret\n\nHasta medikal müdahaleye hazır. İlk basamak seçeneğini belirle:`,
+      choices: [
+        { label: 'Kalsiyum Glukonat IM + Oksitosin SC (standart protokol)', nextNodeId: 'c2_kalsiyum_oksit', effects: { budgetDelta: -90, hrDelta: -5 } },
+        { label: 'Sadece Oksitosin ver (kalsiyum zaten yeterli olabilir)', nextNodeId: 'c2_oksit_tek', isDangerous: true, effects: { budgetDelta: -40, hrDelta: +25, tempDelta: -0.5 } },
+        { label: 'Karın masajı uygula (yumurtayı aşağı it)', nextNodeId: 'c2_masaj', isDangerous: true, effects: {} },
+        { label: 'Direk cerrahiye al (medikal tedavi zaman kaybı)', nextNodeId: 'c2_erken_cerrahi', isDangerous: true, effects: { budgetDelta: -500 } },
+      ],
+    },
+
+    c2_oksit_tek: {
+      id: 'c2_oksit_tek', type: 'death',
+      text: `Kalsiyum verilmeden Oksitosin uygulandı.\n\nKritik hata: Oksitosin oviduktu kasmasını tetikler. Ancak ovidukta kası çalışabilmek için kalsiyum iyonuna ihtiyaç duyar. Kalsiyum eksikliğinde oksitosin kasılma yerine düzensiz, tetanik bir spazm yaratır.\n\nSonuç:\n• Ovidukta tetanik kasılma → Yumurta daha da sıkıştı\n• Ovidukta rüptürü başladı\n• Karın içi kanama\n• Kalp ritmi: 450 bpm → Ventriküler fibrilasyon\n\n💀 ÖLÜM SEBEBİ: Hipokalsemine bağlı ovidukta rüptürü + hemorajik şok\n\n→ Oksitosin ASLA kalsiyum takviyesiz verilmez.`,
+    },
+
+    c2_masaj: {
+      id: 'c2_masaj', type: 'alert',
+      text: `Nazik karın masajı uygulandı — yumurta üzerine çok az baskı.\n\nYumurta hafifçe ilerledi ama kanalda sıkıştı. Kabuk bütünlüğü bozulmuş olabilir.\n\n⚠ Risk: Eğer kabuk çatlarsa yolk peritoniti kaçınılmaz.\n\nPapağan ıkınmaya devam ediyor. Radyografi yenilendi — kabuk hâlâ tam. Şimdilik şans yaver gitti.`,
+      choices: [
+        { label: 'Kalsiyum Glukonat + Oksitosin ile medikal protokole geç', nextNodeId: 'c2_kalsiyum_oksit', effects: { budgetDelta: -90, hrDelta: +10 } },
+        { label: 'Masaja devam et (daha kuvvetli)', nextNodeId: 'c2_masaj_ruptur', isDangerous: true, effects: { killPatient: true, deathCause: 'Masaj ile yumurta kabuğu kırıldı → Yolk peritoniti → Septik şok' } },
+      ],
+    },
+
+    c2_masaj_ruptur: {
+      id: 'c2_masaj_ruptur', type: 'death',
+      text: `Kuvvetli masaj uygulandı. Kabuk bir "çat" sesiyle kırıldı.\n\nYolk karın boşluğuna aktı. Sarı, viskoz sıvı periton boşluğunu doldurdu.\n\n6 saat içinde ağır peritonit ve sepsis gelişti.\n\n💀 ÖLÜM SEBEBİ: İyatrojenik yumurta rüptürü → Yolk peritoniti → Septisemi`,
+    },
+
+    c2_erken_cerrahi: {
+      id: 'c2_erken_cerrahi', type: 'alert',
+      text: `Medikal tedavi atlanarak direkt cerrahiye alındı. Hasta stabilize edilmişti — bu bir artı. Ancak medikal protokolün atlandığı bu vakada gereksiz anestezi riski alındı.\n\nAnestezi seçimi yapılmalı — kuşlarda bu kritik bir adım.`,
+      choices: [
+        { label: 'İzofloran inhalasyon anestezisi (maske indüksiyon)', nextNodeId: 'c2_dogru_anestezi', effects: { budgetDelta: -300 } },
+        { label: 'Ketamin IM (hızlı ve pratik)', nextNodeId: 'c2_ketamin_olum', isDangerous: true, effects: { budgetDelta: -80, hrDelta: +40, respDelta: -15 } },
+        { label: 'Propofol IV (bildiğimiz anestezi)', nextNodeId: 'c2_propofol_olum', isDangerous: true, effects: { budgetDelta: -100, hrDelta: -40, respDelta: -20 } },
+      ],
+    },
+
+    c2_kalsiyum_oksit: {
+      id: 'c2_kalsiyum_oksit', type: 'normal',
+      text: `Protokol uygulandı:\n\n💉 Kalsiyum Glukonat %10 — 50–100 mg/kg IM (dilüe, yavaş)\n⏳ 30 dakika beklendi…\n💉 Oksitosin — 2–5 IU/kg IM\n\nOvidukta kasılmaları düzenli hale geldi. Papağan güçlü ıkınma hareketleri yapıyor.\n\n1 saat izleme:\n• Kalp ritmi: 265 bpm (stabil)\n• Sıcaklık: 40.1°C ✓\n\nYumurta kloakadan görünmeye başladı — ama tam çıkamadı. 4 saat bekleme sonunda medikal tedavi yetersiz kaldı.\n\nSıradaki adım: Cerrahi müdahale.`,
+      choices: [
+        { label: 'Ovosentez + İzofloran — anestezi protokolüne geç', nextNodeId: 'c2_anestezi_secimi', effects: { budgetDelta: -50 } },
+      ],
+    },
+
+    c2_anestezi_secimi: {
+      id: 'c2_anestezi_secimi', type: 'alert',
+      text: `⚠ KRİTİK KARAR — ANESTEZİ SEÇİMİ\n\nKuşlarda anestezi memelilerden temelden farklıdır:\n• Hava kesesi sistemi → Solunum fizyolojisi çok hassas\n• Ufak doz hataları → Anında apne\n• Reversal agent (geri döndürücü) imkânı çok kısıtlı\n• Metabolizma hızı yüksek → İlaç etkisi hızlı, ama düzensiz\n\nHangi anestezi protokolünü uygularsın?`,
+      choices: [
+        { label: 'İzofloran inhalasyon (maske ile indüksiyon, %3–4 → %1.5–2 idame)', nextNodeId: 'c2_dogru_anestezi', effects: { budgetDelta: -300 } },
+        { label: 'Ketamin IM — 10 mg/kg (hızlı ve yaygın)', nextNodeId: 'c2_ketamin_olum', isDangerous: true, effects: { hrDelta: +50, respDelta: -18, budgetDelta: -80 } },
+        { label: 'Propofol IV — 6 mg/kg (standart küçük hayvan anestezisi)', nextNodeId: 'c2_propofol_olum', isDangerous: true, effects: { hrDelta: -60, respDelta: -22, budgetDelta: -100 } },
+        { label: 'Anestezisiz ovosentez (lokal anestezi ile)', nextNodeId: 'c2_lokal_anestezi', isDangerous: true, effects: { budgetDelta: -50 } },
+      ],
+    },
+
+    c2_ketamin_olum: {
+      id: 'c2_ketamin_olum', type: 'death',
+      text: `Ketamin 10 mg/kg IM uygulandı.\n\nKuşlarda ketamin tek başına kullanımı son derece tehlikelidir:\n• Katalepsi yaratır ama analjezi yetersiz kalır\n• Solunum depresyonu derin ve uzun süreli\n• Hava kesesi sisteminde gaz birikimi → Diffüzyon bozukluğu\n• Kuşlarda reversal agent çalışmaz\n\nSonuç:\n• Solunum: 4/dk → Apne\n• SpO₂: %72 → Ağır hipoksi\n\n💀 ÖLÜM SEBEBİ: Ketamin kaynaklı solunum depresyonu → Hipoksik kardiyak arrest\n\n→ Avian anestezide ALTIN STANDART İzofloran'dır.`,
+    },
+
+    c2_propofol_olum: {
+      id: 'c2_propofol_olum', type: 'death',
+      text: `Propofol 6 mg/kg IV uygulandı.\n\nPropofol kuşlarda kritik derecede tehlikelidir:\n• Propofol apne eşiği memelilere göre çok daha düşük\n• Kuşlarda reversal agent yok — apne başladığında geri dönüş yok\n• Hava kesesi fizyolojisi propofol'ün dağılımını öngörülemez kılar\n\nSonuç:\n• İnjeksiyondan 20 saniye sonra apne\n• SpO₂ hızla sıfıra indi\n\n💀 ÖLÜM SEBEBİ: Propofol kaynaklı apne → Hipoksik kardiyak arrest\n\n→ Propofol kuşlarda kontrendikedir.`,
+    },
+
+    c2_lokal_anestezi: {
+      id: 'c2_lokal_anestezi', type: 'alert',
+      text: `Lokal Lidokain ile ovosentez girişimi yapıldı.\n\nPapağan prosedür boyunca strese girdi. Lokal anestezi yeterli analjezi sağlayamadı — hasta şiddetle çırpındı.\n\nYumurta kabuğu çatladı. Ovidukta yırtık oluştu.\n\nKontrol edilemeyen kanama başladı.`,
+      choices: [
+        { label: 'Acil İzofloran anestezisi aç ve laparotomiye geç', nextNodeId: 'c2_acil_laparotomi', effects: { hrDelta: +40, tempDelta: -0.6, budgetDelta: -700, repDelta: -0.3 } },
+      ],
+    },
+
+    c2_acil_laparotomi: {
+      id: 'c2_acil_laparotomi', type: 'alert',
+      text: `Acil İzofloran anestezisi açıldı. Laparotomi yapıldı.\n\nOvidukta yırtık tamiri yapıldı. Yumurta parçaları temizlendi. Karın lavajı uygulandı.\n\n2 saatlik müdahale sonrası hasta yoğun bakıma alındı. Prognoz: Şüpheli.\n\n48 saat kritik takip sonrası papağan iyileşti. Ancak ovidukta hasar nedeniyle bir daha yumurtlayamayabilir.\n\nBu vaka daha basit bir protokolle çok daha az travmatik sonuçlanabilirdi.`,
+      choices: [
+        { label: 'Vakayı kapat', nextNodeId: 'c2_basari_zor', effects: { repDelta: -0.2 } },
+      ],
+    },
+
+    c2_dogru_anestezi: {
+      id: 'c2_dogru_anestezi', type: 'normal',
+      text: `İzofloran inhalasyon anestezisi başlandı:\n\n🔵 İndüksiyon: %3.5 İzofloran — nazal maske, 500 mL/dk O₂\n🔵 Yanıt: 90 saniyede cerrahi anestezi derinliği sağlandı\n🔵 İdame: %1.5–2 İzofloran — endotrakeal tüp (1 mm çap)\n🔵 Monitörizasyon: Kardiyak ritim + kapnografi\n\nHasta stabil:\n• Kalp: 245 bpm (normal sınırda)\n• Korneal refleks: Zayıf ama mevcut (uygun anestezi derinliği)\n\nCerrahi müdahale seçeneği:`,
+      choices: [
+        { label: 'Ovosentez: İnce iğne ile yumurta içeriğini aspire et (minimal invaziv)', nextNodeId: 'c2_ovosentez', effects: { budgetDelta: -200 } },
+        { label: 'Laparotomi: Karın aç ve yumurtayı bütün çıkar', nextNodeId: 'c2_laparotomi', effects: { budgetDelta: -600 } },
+      ],
+    },
+
+    c2_ovosentez: {
+      id: 'c2_ovosentez', type: 'normal',
+      text: `Ovosentez prosedürü:\n\n🩺 Ultrason rehberliğinde 22G iğne ile yumurtaya girildi\n🩺 İçerik aspire edildi (yolk + albümin — 3 mL)\n🩺 Yumurta kabuğu çöktü ve yumuşadı\n🩺 Nazik baskıyla kabuk kloakadan dışarı çıkarıldı (bütün olarak)\n🩺 Ovidukta lavajı: %0.9 NaCl ile yıkama\n🩺 Anestezi kapatıldı\n\nUyanış:\n• İzofloran kesilince 4 dakikada spontan solunum başladı\n• 8 dakikada sternal pozisyona geçti\n• 15 dakikada ayağa kalktı\n\nMükemmel yanıt.`,
+      choices: [
+        { label: 'Yoğun bakım gözlemi ve taburculuk planı', nextNodeId: 'c2_iyilesme', effects: { hrSet: 265, tempSet: 40.5, respSet: 32, budgetDelta: +800, repDelta: +0.25 } },
+      ],
+    },
+
+    c2_laparotomi: {
+      id: 'c2_laparotomi', type: 'normal',
+      text: `Laparotomi yapıldı. Yumurta bütün olarak oviduktan çıkarıldı.\n\nOvidukta sağlam görünüyor. Karın kapatıldı. Anestezi sonlandırıldı.\n\nUyanış süreci ovosenteze göre daha uzun (daha invaziv girişim). 30 dakikada stabil.\n\nNot: Ovosentez mümkün olduğunda tercih edilmeli — laparotomi daha büyük travma ve daha uzun iyileşme süreci demek.`,
+      choices: [
+        { label: 'Yoğun bakım gözlemi ve taburculuk planla', nextNodeId: 'c2_iyilesme', effects: { hrSet: 268, tempSet: 40.2, respSet: 33, budgetDelta: +800, repDelta: +0.15 } },
+      ],
+    },
+
+    c2_iyilesme: {
+      id: 'c2_iyilesme', type: 'normal',
+      text: `24 saat yoğun bakım:\n\n• Sıcaklık: 40.5°C ✓ (normotermi)\n• Kalp ritmi: 265 bpm ✓\n• Aktif, ötüyor, tohum yiyor\n\nTaburculuk talimatları verilmeye hazır.`,
+      choices: [
+        { label: 'Talimatları ver ve taburcu et', nextNodeId: 'c2_taburculuk', effects: { repDelta: +0.05 } },
+      ],
+    },
+
+    c2_taburculuk: {
+      id: 'c2_taburculuk', type: 'normal',
+      text: `Taburculuk talimatları:\n\n✅ 3 gün ısıtmalı ortamda (28–30°C) tutun\n✅ D3 vitamini + Kalsiyum takviyesi başla\n✅ Bol taze sebze: ıspanak, brokoli, kale\n✅ Aydınlatma süresini 10 saate düşür (hormonal döngüyü baskılar)\n✅ 10 gün sonra kontrol\n✅ Tekrar yumurtlama riski için: Hormonal implant (Suprelorin) değerlendirilebilir\n\nSahip mutlu. Papağan ötüyor.`,
+      choices: [
+        { label: 'Vakayı kapat', nextNodeId: 'c2_basari', effects: { repDelta: +0.05 } },
+      ],
+    },
+
+    c2_basari: {
+      id: 'c2_basari', type: 'success',
+      text: `🏆 VAKA BAŞARIYLA TAMAMLANDI\n\nYumurta Tıkanması (Egg Binding) — Tam İyileşme\n\nDoğru adımlar:\n✓ Minimal stres ile radyografik tanı\n✓ Isıtma + oksijen ile stabilizasyon (ÖNCELİKLİ)\n✓ Kalsiyum Glukonat → Oksitosin (doğru sıra)\n✓ İzofloran inhalasyon anestezisi (avian altın standart)\n✓ Ovosentez (minimal invaziv cerrahi)\n✓ D3 + Kalsiyum ile tekrar önlemi\n\n"Kuşlar bize seslenmez — ama beden dilleri bağırır." — Dr. Sıla`,
+    },
+
+    c2_basari_zor: {
+      id: 'c2_basari_zor', type: 'success',
+      text: `✓ Vaka Kapatıldı — Kısmi Başarı\n\nPapağan hayatta. Ancak yanlış müdahale sırası ek hasar ve uzun iyileşme sürecine yol açtı.\n\nBu vakadan öğrenilenler:\n• Stabilizasyon asla atlanmaz\n• Kuşlarda anestezi seçimi hayat-ölüm farkı yaratır\n• Medikal → Minimal cerrahi → Majör cerrahi hiyerarşisi korunmalı`,
+    },
+
+  }; // NODES sonu
+
+  let _lastCaseIndex = -1;
+  function getRandomCase() {
+    let idx;
+    if (ALL_CASES.length === 1) { idx = 0; }
+    else { do { idx = Math.floor(Math.random() * ALL_CASES.length); } while (idx === _lastCaseIndex); }
+    _lastCaseIndex = idx;
+    return ALL_CASES[idx];
+  }
+
+  function getNode(nodeId) { return NODES[nodeId] || null; }
+
+  return { getNode, getRandomCase };
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ENGINE.JS — Oyun Motoru
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+const DOM = {
+  storyScroll:     document.getElementById('story-scroll'),
+  choicesGrid:     document.getElementById('choices-grid'),
+  typingIndicator: document.getElementById('typing-indicator'),
+  caseId:          document.getElementById('case-id'),
+  vitalHR:   document.getElementById('vital-hr'),
+  vitalTemp: document.getElementById('vital-temp'),
+  vitalResp: document.getElementById('vital-resp'),
+  barHR:     document.getElementById('bar-hr'),
+  barTemp:   document.getElementById('bar-temp'),
+  barResp:   document.getElementById('bar-resp'),
+  ecgCanvas: document.getElementById('ecg-canvas'),
+  statRep:    document.getElementById('stat-rep'),
+  statBudget: document.getElementById('stat-budget'),
+  statTime:   document.getElementById('stat-time'),
+  pSpecies:   document.getElementById('p-species'),
+  pName:      document.getElementById('p-name'),
+  pAge:       document.getElementById('p-age'),
+  pWeight:    document.getElementById('p-weight'),
+  pComplaint: document.getElementById('p-complaint'),
+};
+
+// ── ECG Animasyonu ────────────────────────────────────────────────────────────
+const ECG = (() => {
+  const c = DOM.ecgCanvas;
+  const ctx = c.getContext('2d');
+  let points = [], x = 0, animId = null, bpm = 0, phase = 0, dead = false;
+
+  function ecgSample(ph) {
+    const t = ph % (Math.PI * 2);
+    if (t < 0.3)  return Math.sin(t * 10) * 4;
+    if (t < 0.55) return 0;
+    if (t < 0.65) return -8;
+    if (t < 0.75) return 36 * Math.exp(-Math.pow((t - 0.7) * 30, 2));
+    if (t < 0.85) return -6;
+    if (t < 1.2)  return Math.sin((t - 0.85) * 5) * 5;
+    return 0;
+  }
+
+  function draw() {
+    const W = c.width, H = c.height, mid = H / 2;
+    ctx.clearRect(0, 0, W, H);
+    if (dead) {
+      ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
+      ctx.setLineDash([]);
+      return;
+    }
+    phase += bpm > 0 ? bpm / 60 * 0.08 : 0;
+    const sample = bpm > 0 ? ecgSample(phase) : 0;
+    points.push({ x, y: mid - sample });
+    if (points.length > W) points.shift();
+    points.forEach(p => p.x--);
+    ctx.strokeStyle = 'rgba(46,166,138,0.1)'; ctx.lineWidth = 0.5;
+    for (let gx = 0; gx < W; gx += 20) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke();
+    const color = bpm < 40 || bpm > 200 ? '#e05c5c' : bpm < 60 || bpm > 160 ? '#e8a838' : '#3fb950';
+    ctx.strokeStyle = color; ctx.lineWidth = 1.8; ctx.shadowColor = color; ctx.shadowBlur = 4;
+    ctx.beginPath();
+    points.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.stroke(); ctx.shadowBlur = 0;
+    x++; if (x > W) x = 0;
+  }
+
+  return {
+    start(newBpm) { bpm = newBpm; dead = false; if (!animId) (function loop() { draw(); animId = requestAnimationFrame(loop); })(); },
+    update(newBpm) { bpm = newBpm; },
+    flatline() { dead = true; bpm = 0; },
+    stop() { cancelAnimationFrame(animId); animId = null; },
+  };
+})();
+
+// ── Klinik Saati ─────────────────────────────────────────────────────────────
+const Clock = (() => {
+  const DAYS = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+  let day = 0, hour = 9, minute = 0, timerId = null;
+  function fmt() { DOM.statTime.textContent = `${DAYS[day]} · ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`; }
+  return {
+    start() {
+      fmt();
+      timerId = setInterval(() => {
+        minute += 15;
+        if (minute >= 60) { minute = 0; hour++; }
+        if (hour >= 20)   { hour = 9; minute = 0; day = (day + 1) % 7; }
+        fmt();
+      }, 8000);
+    },
+    stop() { clearInterval(timerId); },
+  };
+})();
+
+function addStoryEntry(text, type = 'normal') {
+  const entry = document.createElement('div');
+  entry.className = 'story-entry';
+  const who = document.createElement('div');
+  const msg = document.createElement('div');
+  who.className = 'who'; msg.className = 'msg';
+  if (type === 'system') { who.classList.add('system'); msg.classList.add('system'); who.textContent = 'Sistem'; }
+  else if (type === 'alert') { who.textContent = '⚠ Kritik'; msg.classList.add('alert'); }
+  else if (type === 'death') { who.textContent = '✖ Eksitus'; msg.classList.add('alert'); }
+  else { who.textContent = 'Dr. Sıla'; }
+  msg.textContent = text;
+  entry.appendChild(who); entry.appendChild(msg);
+  DOM.storyScroll.appendChild(entry);
+  DOM.storyScroll.scrollTop = DOM.storyScroll.scrollHeight;
+}
+
+function showTyping(ms = 900) {
+  return new Promise(resolve => {
+    DOM.typingIndicator.classList.add('visible');
+    setTimeout(() => { DOM.typingIndicator.classList.remove('visible'); resolve(); }, ms);
+  });
+}
+
+function colorVital(label, bar, val, min, max) {
+  const margin = (max - min) * 0.2;
+  label.classList.remove('ok','warn','danger'); bar.style.background = '';
+  if (val <= 0) return;
+  if (val >= min && val <= max) { label.classList.add('ok'); bar.style.background = 'var(--ok)'; }
+  else if (val >= min - margin && val <= max + margin) { label.classList.add('warn'); bar.style.background = 'var(--warn)'; }
+  else { label.classList.add('danger'); bar.style.background = 'var(--danger)'; }
+}
+
+function updateUI() {
+  const state = Player.getState();
+  const vitals = state.vitals;
+  DOM.statRep.textContent    = `★ ${state.reputation.toFixed(1)}`;
+  DOM.statBudget.textContent = `₺ ${state.budget.toLocaleString('tr-TR')}`;
+  const hrVal = vitals.heartRate;
+  const hrNorm = vitals.hrNormal || { min: 60, max: 140 };
+  DOM.vitalHR.textContent = hrVal > 0 ? `${hrVal} bpm` : '— bpm';
+  DOM.barHR.style.width = Math.min(100, Math.max(0, (hrVal / 400) * 100)) + '%';
+  colorVital(DOM.vitalHR, DOM.barHR, hrVal, hrNorm.min, hrNorm.max);
+  ECG.update(hrVal);
+  const tmp = vitals.temperature;
+  DOM.vitalTemp.textContent = tmp > 0 ? `${tmp.toFixed(1)} °C` : '— °C';
+  DOM.barTemp.style.width = Math.min(100, Math.max(0, ((tmp - 35) / 8) * 100)) + '%';
+  colorVital(DOM.vitalTemp, DOM.barTemp, tmp, hrNorm.min === 250 ? 40.0 : 38.0, hrNorm.min === 250 ? 42.0 : 39.5);
+  const rsp = vitals.respiration;
+  DOM.vitalResp.textContent = rsp > 0 ? `${rsp} /dk` : '— /dk';
+  DOM.barResp.style.width = Math.min(100, Math.max(0, (rsp / 60) * 100)) + '%';
+  colorVital(DOM.vitalResp, DOM.barResp, rsp, hrNorm.min === 250 ? 25 : 15, hrNorm.min === 250 ? 40 : 30);
+  const p = state.patient;
+  if (p) {
+    const icons = { cat: '🐱 Kedi', dog: '🐶 Köpek', bird: '🐦 Kuş' };
+    DOM.pSpecies.innerHTML = `<span class="species-badge">${icons[p.species] || p.species}</span>`;
+    DOM.pName.textContent      = p.name      || '—';
+    DOM.pAge.textContent       = p.age       || '—';
+    DOM.pWeight.textContent    = p.weight    || '—';
+    DOM.pComplaint.textContent = p.complaint || '—';
+  }
+}
+
+const KEYS = ['A','B','C','D','E','F'];
+
+function renderChoices(choices) {
+  DOM.choicesGrid.innerHTML = '';
+  if (!choices.length) {
+    DOM.choicesGrid.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:8px">Vaka sonuçlandı.</p>';
+    return;
+  }
+  choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    if (choice.isDangerous) btn.classList.add('danger-choice');
+    btn.innerHTML = `<span class="ch-key">${KEYS[i] || i+1}</span>${escapeHTML(choice.label)}`;
+    btn.addEventListener('click', () => makeChoice(choice));
+    DOM.choicesGrid.appendChild(btn);
+  });
+  document.onkeydown = (e) => {
+    const idx = KEYS.indexOf(e.key.toUpperCase());
+    if (idx >= 0) { const btns = DOM.choicesGrid.querySelectorAll('.choice-btn:not(:disabled)'); if (btns[idx]) btns[idx].click(); }
+  };
+}
+
+function setChoicesEnabled(enabled) {
+  DOM.choicesGrid.querySelectorAll('.choice-btn').forEach(b => b.disabled = !enabled);
+}
+
+async function loadNode(nodeId) {
+  setChoicesEnabled(false);
+  const node = Levels.getNode(nodeId);
+  if (!node) { addStoryEntry(`[HATA] Node bulunamadı: ${nodeId}`, 'system'); return; }
+  DOM.caseId.textContent = `Vaka #${Player.getState().caseNumber} · ${nodeId}`;
+  await showTyping(600 + Math.random() * 500);
+  const type = node.type || 'normal';
+  addStoryEntry(node.text, type);
+  if (type === 'death')   { ECG.flatline(); renderGameOver(); return; }
+  if (type === 'success') { renderSuccess(); return; }
+  renderChoices(node.choices || []);
+  updateUI();
+}
+
+async function makeChoice(choice) {
+  setChoicesEnabled(false);
+  addStoryEntry(`› ${choice.label}`, 'system');
+  if (choice.effects) Player.applyEffects(choice.effects);
+  updateUI();
+  if (Player.isPatientDead()) {
+    await showTyping(600);
+    addStoryEntry('Hastanın hayati fonksiyonları durdu. Tüm müdahalelere rağmen hasta kaybedildi.', 'death');
+    ECG.flatline();
+    renderGameOver();
+    return;
+  }
+  await loadNode(choice.nextNodeId);
+}
+
+function renderGameOver() {
+  DOM.choicesGrid.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'choice-btn';
+  btn.style.cssText = 'grid-column:1/-1;justify-content:center;border-color:var(--danger)';
+  btn.innerHTML = '<span class="ch-key" style="background:var(--danger);color:#fff">↺</span> Yeni Vakaya Geç';
+  btn.addEventListener('click', () => startGame());
+  DOM.choicesGrid.appendChild(btn);
+  Player.recordLoss(); updateUI();
+}
+
+function renderSuccess() {
+  DOM.choicesGrid.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'choice-btn';
+  btn.style.cssText = 'grid-column:1/-1;justify-content:center;border-color:var(--ok)';
+  btn.innerHTML = '<span class="ch-key" style="background:var(--ok);color:#fff">★</span> Sonraki Vakaya Geç';
+  btn.addEventListener('click', () => startGame());
+  DOM.choicesGrid.appendChild(btn);
+  Player.recordWin(); updateUI();
+}
+
+function startGame() {
+  DOM.storyScroll.innerHTML = '';
+  DOM.choicesGrid.innerHTML = '';
+  const caseData = Levels.getRandomCase();
+  Player.initCase(caseData);
+  updateUI();
+  ECG.start(Player.getState().vitals.heartRate);
+  addStoryEntry('Yeni hasta muayene odasına alındı. İyi şanslar, Dr. Sıla.', 'system');
+  loadNode(caseData.startNodeId);
+}
+
+function escapeHTML(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Sıla portresi SVG olarak sila-portrait.svg dosyasından yüklenir ──
+
+window.addEventListener('DOMContentLoaded', () => { Clock.start(); startGame(); });
+window.Engine = { startGame, loadNode, makeChoice, updateUI };
+</script>
+
+</body>
+</html>
